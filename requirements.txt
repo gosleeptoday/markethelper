@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+tortoise-orm
+aiogram
+python-dotenv
+httpx
