@@ -1,6 +1,7 @@
 from .user_service import UserService
 from .request_service import RequestService
-"""from .subscription_service import SubscriptionService
+from .subscription_service import SubscriptionService
+"""
 from .file_service import FileService
 from .referral_service import ReferralService
 from .mailing_service import MailingService

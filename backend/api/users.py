@@ -9,7 +9,6 @@ router = APIRouter(prefix="/admin/users", tags=["Admin - Users"])
 async def list_users():
     return await UserService.list_users()
 
-
 @router.get("/{user_id}", response_model=UserOut)
 async def get_user(user_id: int):
     return await UserService.get_user(user_id)

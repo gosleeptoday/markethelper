@@ -1,74 +1,117 @@
+:root {
+  --bg: #181b21;
+  --fg: #f5f6fa;
+  --fg-muted: #bac1d3;
+  --surface: #23262e;
+  --border: #242837;
+  --accent: #55aaff;
+  --radius: 16px;
+  --btn-approve: #55aaff;
+  --btn-reject: #e8616b;
+}
+
 body {
-  font-family: sans-serif;
-  padding: 20px;
-  background: #f9f9f9;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  margin: 0;
+  padding: 24px;
+  line-height: 1.7;
 }
 
 h1 {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 32px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--fg);
+  border-radius: var(--radius);
 }
 
 nav.navbar {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   justify-content: center;
-  margin-bottom: 20px;
-  padding: 10px;
-  background: #333;
-  border-radius: 6px;
+  padding: 11px 0;
+  margin-bottom: 32px;
+  background: var(--surface);
+  border-radius: var(--radius);
 }
 
 nav.navbar a {
-  color: white;
+  color: var(--fg-muted);
   text-decoration: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  transition: background 0.2s;
+  font-size: 15px;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  transition: background 0.18s, color 0.18s;
 }
 
-nav.navbar a:hover {
-  background: #555;
-}
-
+nav.navbar a:hover,
 nav.navbar a.active {
-  background: #4CAF50;
+  color: var(--accent);
+  background: #20232b;
 }
 
 table {
   width: 100%;
-  border-collapse: collapse;
-  background: white;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: none;
+  overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 th, td {
-  border: 1px solid #ddd;
-  padding: 10px;
+  padding: 13px 12px;
   text-align: center;
+  border-bottom: 1px solid var(--border);
 }
 
 th {
-  background: #f4f4f4;
+  font-weight: 600;
+  color: var(--fg);
+  background: #20232b;
+  font-size: 0.97rem;
+}
+
+td {
+  color: var(--fg-muted);
+  font-size: 15px;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover td {
+  background: #242837;
+  transition: background 0.18s;
 }
 
 button {
-  padding: 6px 12px;
+  padding: 10px 19px;
   border: none;
-  border-radius: 4px;
+  border-radius: calc(var(--radius) - 4px);
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
+  outline: none;
+  transition: background 0.18s;
 }
 
-.approve {
-  background: #4CAF50;
-  color: white;
+button.approve {
+  background: var(--btn-approve);
+  color: #fff;
 }
 
-.reject {
-  background: #f44336;
-  color: white;
+button.reject {
+  background: var(--btn-reject);
+  color: #fff;
 }
 
-button:hover {
-  opacity: 0.9;
+button:active {
+  opacity: 0.92;
 }

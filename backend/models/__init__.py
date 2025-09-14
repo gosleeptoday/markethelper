@@ -1,4 +1,4 @@
-from .user import User
+from .user import User, Referral
 from .subscription import Subscription, AccessGroup
 from .file import AccessFile
 from .request import Request

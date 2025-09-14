@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from backend.api.subscriptions import SubscriptionService
+from backend.services.subscription_service import SubscriptionService
 from backend.models import User
 from backend.models.enums import Tariff
 from backend.schemas import UserOut, UserBase, UserUpdate, UserCreate

@@ -7,12 +7,12 @@ def create_app() -> FastAPI:
 
     app.include_router(users.router)
     """app.include_router(subscriptions.router)
-    app.include_router(files.router)
-    app.include_router(referrals.router)"""
+    app.include_router(files.router)"""
+    app.include_router(referrals.router)
     app.include_router(requests.router)
     """app.include_router(mailing.router)
-    app.include_router(ai.router)
     app.include_router(session_updater.router)"""
+    app.include_router(ai.router)
     app.include_router(profile.router)
 
 

@@ -7,7 +7,7 @@ router = Router()
 api = APIClient()
 
 
-@router.message(F.text == "🛒 Тарифы и подписка")
+@router.message(F.text == "🛒Тарифы и подписка")
 async def choose_tariff(message: Message):
     await message.answer("Выберите тариф:", reply_markup=subscription.tariffs_kb())
 

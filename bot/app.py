@@ -2,7 +2,7 @@ import asyncio
 import uvicorn
 from aiogram import Dispatcher
 from bot.loader import bot, dp
-from bot.handlers import start, subscription, profile  # позже подключишь profile, referral и т.д.
+from bot.handlers import start, subscription, profile, ai  # позже подключишь profile, referral и т.д.
 from bot.api import app as fastapi_app
 
 
@@ -10,7 +10,7 @@ async def run_bot():
     dp.include_router(start.router)
     dp.include_router(subscription.router)
     dp.include_router(profile.router)
-
+    dp.include_router(ai.router)
     # dp.include_router(profile.router)
     # dp.include_router(referral.router)
     # dp.include_router(faq.router)

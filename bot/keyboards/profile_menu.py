@@ -6,4 +6,5 @@ def profile_menu_kb():
         [InlineKeyboardButton(text="🔄 Проверить/Обновить сессию", callback_data="profile:update_session")],
         [InlineKeyboardButton(text="💳 Продлить подписку", callback_data="profile:renew")],
         [InlineKeyboardButton(text="🎁 Реферальная ссылка", callback_data="profile:referral")],
+        [InlineKeyboardButton(text="📞 Связь с оператором", callback_data="profile:support")],
     ])

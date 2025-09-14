@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from backend.models import User, Tariff, Duration, Request, Status, Subscription
+from backend.models import User, Tariff, Duration, Request, Status, Subscription, Referral
 from backend.schemas import RequestOut
 from datetime import datetime, timedelta
 import httpx
@@ -10,15 +10,11 @@ BOT_URL = "http://bot:8001/notify"  # адрес API бота в docker-compose
 
 
 async def notify_user(tg_id: int, message: str):
-    """
-    Шлём уведомление в сервис бота
-    """
     async with httpx.AsyncClient() as client:
         try:
             await client.post(BOT_URL, json={"tg_id": tg_id, "message": message})
         except Exception as e:
             print(f"⚠ Ошибка при отправке уведомления: {e}")
-
 
 async def get_status(type: str, code: str):
     status = await Status.get_or_none(type=type, code=code)
@@ -70,9 +66,6 @@ async def create_request(data: dict):
 
 @router.post("/{request_id}/approve")
 async def approve_request(request_id: int, background_tasks: BackgroundTasks):
-    """
-    Одобрить заявку и создать подписку
-    """
     req = await Request.get_or_none(id=request_id).prefetch_related("user", "tariff", "duration")
     if not req:
         raise HTTPException(status_code=404, detail="Request not found")
@@ -94,14 +87,30 @@ async def approve_request(request_id: int, background_tasks: BackgroundTasks):
     req.status = approved_status
     await req.save()
 
+    # 🎁 проверка реферала
+    referral = await Referral.get_or_none(referred=req.user)
+    if referral and not referral.activated:
+        referral.activated = True
+        await referral.save()
+
+        referrer = await referral.referrer
+        referrer.bonus_balance += 100  # бонус за оплату
+        await referrer.save()
+
+        background_tasks.add_task(
+            notify_user,
+            referrer.tg_id,
+            f"🎉 Ваш реферал @{req.user.username} активировал подписку! "
+            f"+100 бонусов на баланс."
+        )
+
     background_tasks.add_task(
         notify_user,
         req.user.tg_id,
-        f"✅ Ваша заявка #{req.id} на тариф {req.tariff.name} одобрена!"
+        f"✅ Ваша заявка #{req.id} на тариф {req.tariff.name} одобрена!\nНапишите /start еще раз для появления кнопки Профиль."
     )
 
     return {"message": f"Request {request_id} approved", "subscription_id": subscription.id}
-
 
 @router.post("/{request_id}/reject")
 async def reject_request(request_id: int, background_tasks: BackgroundTasks):
