@@ -9,7 +9,7 @@ from openai import AsyncOpenAI
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ai_service")
 
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = ""
 
 client_openai = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
