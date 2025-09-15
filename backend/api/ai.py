@@ -1,26 +1,68 @@
 import logging
 import time
-from fastapi import APIRouter, HTTPException
+from typing import Optional
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+import pdfplumber
 from backend.services import ai_service
 
 router = APIRouter(prefix="/ai", tags=["AI"])
 logger = logging.getLogger("ai_service")
 
 @router.post("/texts")
-async def add_text(data: dict):
-    """
-    Добавить текст в базу знаний (ChromaDB).
-    data = { "text": "любой текст", "metadata": {...} }
-    """
-    if "text" not in data:
-        raise HTTPException(400, "text is required")
+async def add_text(
+    text: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None),
+):
+    if not text and not file:
+        raise HTTPException(400, "Нужно передать либо text, либо PDF файл")
 
-    await ai_service.add_text(
-        data["text"],
-        metadata=data.get("metadata", {})
-    )
-    return {"status": "ok"}
+    if text:
+        await ai_service.add_text(
+            text,
+            metadata={"source": "manual_input", "type": "text"}
+        )
+        return {"status": "ok", "mode": "text", "length": len(text)}
 
+    if file:
+        if not file.filename.endswith(".pdf"):
+            raise HTTPException(400, "Можно загружать только PDF файлы")
+
+        try:
+            total_chunks = 0
+            with pdfplumber.open(file.file) as pdf:
+                for page_num, page in enumerate(pdf.pages, start=1):
+                    page_text = page.extract_text()
+                    if not page_text:
+                        continue
+
+                    chunks = ai_service.chunk_text(page_text, chunk_size=1000, overlap=200)
+                    logger.info(f"Страница {page_num}: {len(page_text)} символов → {len(chunks)} чанков")
+
+                    for i, chunk in enumerate(chunks, start=1):
+                        total_chunks += 1
+                        await ai_service.add_text(
+                            chunk,
+                            metadata={
+                                "source": file.filename,
+                                "type": "pdf",
+                                "page": page_num,
+                                "chunk": i,
+                            }
+                        )
+
+            if total_chunks == 0:
+                raise HTTPException(400, "PDF пустой или не содержит текста")
+
+            return {
+                "status": "ok",
+                "mode": "pdf",
+                "filename": file.filename,
+                "chunks": total_chunks,
+            }
+
+        except Exception as e:
+            logger.error(f"Ошибка при обработке PDF: {str(e)}")
+            raise HTTPException(500, f"Ошибка при обработке PDF: {str(e)}")
 
 @router.get("/texts")
 async def list_texts():
@@ -51,10 +93,9 @@ async def query_ai(data: dict):
     if "question" not in data:
         raise HTTPException(400, "question is required")
 
-    start_time = time.time()  # начало отсчета времени
+    start_time = time.time()
     logger.info(f"Запрос AI: {data['question']}")
 
-    # Вызов сервиса AI
     answer = await ai_service.query_ai(data["question"])
 
     elapsed = time.time() - start_time  # время обработки
@@ -64,6 +105,7 @@ async def query_ai(data: dict):
         "answer": answer,
         "time_seconds": elapsed  # можно возвращать пользователю
     }
+
 
 @router.get("/health")
 async def health_check():
