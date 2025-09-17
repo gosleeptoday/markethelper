@@ -28,7 +28,6 @@ class UserService:
             return existing
         return await User.create(**data.dict())
 
-
     @staticmethod
     async def list_users() -> list[UserOut]:
         users = await User.all()
@@ -55,7 +54,6 @@ class UserService:
     @staticmethod
     async def deactivate_user(user_id: int) -> dict:
         user = await User.get(id=user_id)
-        # например, снимаем подписку или переводим в статус "inactive"
         user.is_active = False
         await user.save()
         return {"message": f"Пользователь {user_id} деактивирован"}
@@ -90,7 +88,5 @@ class UserService:
             active_until=active_until,
             access_group=access_group,
             access_file_path=access_file_path,
-            level_name=None, 
-            xp=user.xp,
             bonus_balance=user.bonus_balance,
         )

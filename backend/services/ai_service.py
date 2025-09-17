@@ -1,10 +1,12 @@
 import os
 import asyncio
 import logging
+import uuid
 import chromadb
 from chromadb.utils import embedding_functions
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from openai import AsyncOpenAI
+import pdfplumber
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ai_service")
@@ -26,35 +28,36 @@ collection = client.get_or_create_collection(
 splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
 
 
-async def add_text(content: str, metadata: dict | None = None):
+async def add_text(text: str, metadata: dict):
     logger.info("Начало добавления текста в ChromaDB")
-    chunks = splitter.split_text(content)
-    logger.info(f"Текст разбит на {len(chunks)} чанков")
 
-    for i, chunk in enumerate(chunks):
-        logger.info(f"Добавляю чанк {i}")
-        try:
-            await asyncio.to_thread(
-                collection.add,
-                documents=[chunk],
-                ids=[f"{metadata.get('source', 'doc')}_{i}" if metadata else f"doc_{i}"],
-                metadatas=[metadata or {}]
+    try:
+        doc_id = str(uuid.uuid4())  # генерируем уникальный ID
+        await asyncio.to_thread(
+            lambda: collection.add(
+                ids=[doc_id],
+                documents=[text],
+                metadatas=[metadata],
             )
-        except Exception as e:
-            logger.error(f"Ошибка при добавлении чанка {i}: {e}")
-    logger.info("Текст успешно добавлен")
+        )
+        logger.info(f"Текст добавлен: {doc_id[:8]}...")
 
+    except Exception as e:
+        logger.error(f"Ошибка при добавлении текста: {e}")
+        raise
 
-async def list_texts() -> list[str]:
+async def list_texts():
     logger.info("Запрос списка всех текстов")
     try:
-        texts = await asyncio.to_thread(lambda: [doc for doc in collection.get()["documents"]])
+        result = await asyncio.to_thread(lambda: collection.get())
+        docs = result["documents"]
+        metas = result["metadatas"]
+        texts = [{"text": d, "metadata": m} for d, m in zip(docs, metas)]
         logger.info(f"Найдено {len(texts)} текстов")
         return texts
     except Exception as e:
         logger.error(f"Ошибка при получении текстов: {e}")
         return []
-
 
 async def query_ai(question: str) -> str:
     logger.info(f"Запрос AI: {question}")
@@ -90,7 +93,7 @@ async def query_ai(question: str) -> str:
     print(prompt)
     try:
         response = await client_openai.chat.completions.create(
-            model="gpt-4o-mini",  # можно заменить на gpt-4o или gpt-3.5-turbo
+            model="gpt-4o-mini", 
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
         )
@@ -100,3 +103,16 @@ async def query_ai(question: str) -> str:
     except Exception as e:
         logger.error(f"Ошибка при запросе к OpenAI: {e}")
         return "❌ Ошибка при обработке запроса AI"
+
+def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200):
+    """
+    Разбиваем длинный текст на чанки для векторной БД.
+    """
+    chunks = []
+    start = 0
+    while start < len(text):
+        end = start + chunk_size
+        chunk = text[start:end]
+        chunks.append(chunk.strip())
+        start += chunk_size - overlap
+    return [c for c in chunks if c]

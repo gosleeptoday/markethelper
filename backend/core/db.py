@@ -1,5 +1,5 @@
 from tortoise import Tortoise
-from backend.models import Tariff, Status, Duration, Audience, FileType, Level, Experience, Platform, TrafficSource
+from backend.models import Tariff, Status, Duration, Audience
 
 TORTOISE_ORM = {
     "connections": {
@@ -85,26 +85,6 @@ async def init_db():
     if not await Audience.exists():
         for audience in AUDIENCES:
             await Audience.create(**audience)
-
-    if not await FileType.exists():
-        for file_type in FILE_TYPES:
-            await FileType.create(**file_type)
-
-    if not await Level.exists():
-        for level in LEVELS:
-            await Level.create(**level)
-
-    if not await Experience.exists():
-        for experience in EXPERIENCES:
-            await Experience.create(**experience)
-
-    if not await Platform.exists():
-        for platform in PLATFORMS:
-            await Platform.create(**platform)
-
-    if not await TrafficSource.exists():
-        for traffic_source in TRAFFIC_SOURCES:
-            await TrafficSource.create(**traffic_source)
 
 # Функция для закрытия соединений с БД
 async def close_db():

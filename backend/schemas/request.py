@@ -15,9 +15,13 @@ class RequestBase(BaseModel):
 class RequestCreate(RequestBase):
     pass
 
+
 class RequestOut(BaseModel):
     id: int
-    user_id: int
+    tg_id: int
+    username: Optional[str]
+    full_name: Optional[str]
+
     tariff_code: str
     duration_months: int
     status: str
@@ -31,13 +35,15 @@ class RequestOut(BaseModel):
         tariff = obj.tariff
         duration = obj.duration
         status = obj.status
+        user = obj.user
 
         return cls(
             id=obj.id,
-            user_id=obj.user.id,
-            tariff_code=tariff.code,  
-            duration_months=duration.months, 
+            tg_id=user.tg_id,
+            username=user.username,
+            full_name=user.full_name,
+            tariff_code=tariff.code,
+            duration_months=duration.months,
             status=status.name,
-            created_at=obj.created_at
+            created_at=obj.created_at,
         )
-

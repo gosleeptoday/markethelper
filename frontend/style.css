@@ -115,3 +115,58 @@ button.reject {
 button:active {
   opacity: 0.92;
 }
+
+section {
+  background: var(--surface);
+  padding: 20px;
+  border-radius: var(--radius);
+  margin-bottom: 32px;
+  border: 1px solid var(--border);
+}
+
+section h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.3rem;
+  color: var(--accent);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+textarea,
+input[type="text"],
+input[type="file"] {
+  background: #20232b;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 8px);
+  color: var(--fg);
+  padding: 10px 12px;
+  font-size: 15px;
+  outline: none;
+}
+
+textarea:focus,
+input[type="text"]:focus,
+input[type="file"]:focus {
+  border-color: var(--accent);
+}
+
+#healthStatus,
+#uploadResult,
+#answerBox {
+  margin-top: 12px;
+  padding: 12px;
+  background: #20232b;
+  border-radius: calc(var(--radius) - 6px);
+  font-size: 15px;
+  white-space: pre-wrap;
+  border: 1px solid var(--border);
+}
+
+#answerBox b {
+  color: var(--accent);
+}

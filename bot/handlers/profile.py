@@ -1,8 +1,11 @@
 from aiogram import Router, types, F
 from datetime import datetime
+from backend.services.file_service import FileService
+from tortoise.exceptions import DoesNotExist
+from bot.keyboards.cookie import file_actions_kb
 from bot.services.api_client import APIClient
 from bot.keyboards.profile_menu import profile_menu_kb
-from bot.keyboards import subscription  # импортируем клавиатуру тарифов
+from bot.keyboards import subscription 
 
 router = Router()
 api = APIClient()
@@ -33,9 +36,6 @@ async def show_profile(message: types.Message):
         f"⭐️ <b>Тариф:</b> {data.get('tariff_name') or 'нет'}\n"
         f"🗓️ <b>Активен до:</b> { _fmt_date(active_until) }\n"
         f"📁 <b>Файл:</b> {data.get('access_file_path') or '—'} "
-        f"(группа {data.get('access_group') or '—'})\n"
-        f"🏆 <b>Уровень:</b> {data.get('level_name') or '—'}\n"
-        f"✨ <b>XP:</b> {data.get('xp')}\n"
         f"💰 <b>Бонусы:</b> {data.get('bonus_balance')}"
     )
 
@@ -61,23 +61,26 @@ async def referral_info(callback: types.CallbackQuery):
     )
     await callback.answer()
 
-
 @router.callback_query(F.data == "profile:get_file")
 async def get_file_handler(callback: types.CallbackQuery):
-    # TODO: реализовать handle_get_file
-    await callback.message.answer("📁 Заглушка: здесь будет выдача файла доступа.")
+    try:
+        file_info = await FileService.get_file(file_id=1)  # 🔧 пока тестовый id
+    except DoesNotExist:
+        await callback.message.answer("❌ Файл не найден.")
+        await callback.answer()
+        return
+
+    text = (
+        f"📅 Обновлён: <code>{file_info['last_updated']}</code>\n"
+    )
+
+    await callback.message.answer(
+        text,
+        parse_mode="HTML",
+        reply_markup=file_actions_kb(file_info["id"])
+    )
     await callback.answer()
-    # async def handle_get_file()
-
-
-@router.callback_query(F.data == "profile:update_session")
-async def update_session_handler(callback: types.CallbackQuery):
-    # TODO: реализовать handle_update_session
-    await callback.message.answer("🔄 Заглушка: здесь будет проверка/обновление сессии.")
-    await callback.answer()
-    # async def handle_update_session()
-
-
+    
 @router.callback_query(F.data == "profile:support")
 async def support_handler(callback: types.CallbackQuery):
     support_username = "YourSupportOperator"
@@ -85,7 +88,6 @@ async def support_handler(callback: types.CallbackQuery):
         f"📞 Связаться с оператором можно здесь: @{support_username}"
     )
     await callback.answer()
-
 
 @router.callback_query(F.data == "profile:renew")
 async def renew_subscription(callback: types.CallbackQuery):

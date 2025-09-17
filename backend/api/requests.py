@@ -6,7 +6,7 @@ import httpx
 
 router = APIRouter(prefix="/admin/requests", tags=["Admin - Requests"])
 
-BOT_URL = "http://bot:8001/notify"  # адрес API бота в docker-compose
+BOT_URL = "http://bot:8001/notify" 
 
 
 async def notify_user(tg_id: int, message: str):

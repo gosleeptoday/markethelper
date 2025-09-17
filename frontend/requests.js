@@ -25,7 +25,11 @@ async function loadRequests() {
 
       row.innerHTML = `
         <td>${req.id}</td>
-        <td>${req.user_id}</td>
+        <td>
+          ${req.username 
+            ? `<a href="https://t.me/${req.username}" target="_blank">@${req.username}</a>` 
+            : `<span style="color: gray;">нет username</span>`}
+        </td>
         <td>${req.tariff_code}</td>
         <td>${req.duration_months} мес.</td>
         <td>${req.status}</td>

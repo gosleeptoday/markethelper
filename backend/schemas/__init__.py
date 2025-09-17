@@ -3,7 +3,6 @@ from .subscription import SubscriptionBase, SubscriptionCreate, SubscriptionOut,
 from .file import AccessFileBase, AccessFileCreate, AccessFileOut
 from .request import RequestBase, RequestCreate, RequestOut
 from .mailing import MailingBase, MailingCreate, MailingOut
-from .knowledge_base import KnowledgeBaseBase, KnowledgeBaseCreate, KnowledgeBaseOut
 from .ai import AIRequestBase, AIRequestCreate, AIRequestOut
 from .enums import (
     TariffOut, StatusOut, DurationOut,
